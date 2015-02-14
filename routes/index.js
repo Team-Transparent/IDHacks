@@ -45,6 +45,21 @@ var convertPdf = function(pdfId, success, failure) {
     });
 }
 
+function makeCSV(input, outputfile) {
+    var array = input.split("\n");
+    fs.writeFile(outputfile + '.txt', 'ID,FY12,FY13,FY14\r\n')
+    for (i in array) {
+        last = array[i].length - 1;
+        if (!isNaN(array[i][0]) && !isNaN(array[i][last])) { // only writes out lines that begin and end with numbers
+            parsedline = array[i].replace(/[^\d\s]/g, ''); //remove all non-numerical characters and double spaces from line
+            condnsline = parsedline.replace(/\s+/g, ' '); // cut out excess space
+            csvline = condnsline.replace(/\s/g, ',') + '\r\n';
+            console.log(csvline);
+            fs.appendFile(outputfile + '.txt', csvline);
+        }
+    }
+}
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
@@ -68,13 +83,14 @@ router.get('/list', function(req, res, next){
     });
 });
 
-/* Turns PDF into CSV  */
+/* Turns PDF into CSV. Only for Ajax! */
 router.get('/convert/:id', function(req, res, next ) {
     var pdfId = req.params.id;
     convertPdf(pdfId, function success(text) {
-        res.render('dump', { text: text });
+        makeCSV(text, "public/csv/" + pdfId);
+        res.send(text);
     }, function failure(){
-        res.render('fail', { message: 'Error parsing PDF!'});
+        res.send('Error parsing PDF!');
     });
 });
 
