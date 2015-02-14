@@ -12,7 +12,7 @@ router.get('/', function(req, res, next) {
 
 router.get('/upload/:id', function(req, res, next ) {
     var pdfId = req.params.id;
-    var filename = "pdf/" + pdfId + ".pdf";
+    var filename = "public/pdf/" + pdfId + ".pdf";
     console.log('PDF ID =', pdfId);
 
     fs.stat(filename, function(err, stats) {
