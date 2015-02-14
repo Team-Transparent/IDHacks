@@ -246,7 +246,7 @@ var convertPdf = function(pdfId, success, failure) {
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.redirect('/interactive');
+  res.render('index', { title: 'Transparent'});
 });
 
 /* GET list of PDFs */
