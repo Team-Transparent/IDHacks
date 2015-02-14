@@ -23,11 +23,31 @@ var csvItem = function(input) {
 	this.fy13 = input.fy13;
 	this.fy14 = input.fy14;
 }
+csvItem.prototype.toString = function(){
+	var data = [
+		this.id,
+		this.vote,
+		this.program,
+		this.subvote,
+		this.itemName,
+		this.fy12,
+		this.fy13,
+		this.fy14
+	];
+	var str = data.join(',');
+	return str;
+}
 
 // Cleans up the given input string.
 var tidy = function(item){
 	item = item.toLowerCase();
 	item = _.titleize(item);
+
+	// commas mess up csv so get rid of them
+	item = item.replace(/,/g, '');
+
+	// remove duplicate spaces
+	item = item.replace(/\s+/g, ' ');
 
 	return item;
 }
@@ -46,7 +66,7 @@ var toCsv = function(rawText) {
 	var voteRegex = /^vote \d+ ([\s\S]+)$/ig;
 	var programRegex = /^programme \d+ ([\s\S]+)$/ig;
 	var subvoteRegex = /^subvote \d+ ([\s\S]+)$/ig;
-	var itemRegex = /^(\d{6}) ([^\d]*) ([\d.,])* ([\d.,])* ([\d.,])*$/ig;
+	var itemRegex = /^(\d{6}) ([^\d]*) ([\d.,]*) ([\d.,]*) ([\d.,]*)$/ig;
 
     // these are thing to keep track of as we go through each item
     var vote, program, subvote;
@@ -68,7 +88,7 @@ var toCsv = function(rawText) {
     });
 
 	// now loop over to each item
-	_.each(inlines, function(line){
+	var items = _.map(inlines, function(line){
 		// check for program
 		var match = programRegex.exec(line);
 		if(match){
@@ -86,7 +106,6 @@ var toCsv = function(rawText) {
 			match = itemRegex.exec(line);
 			if(match){
 				// id, itemName, fy12, fy13, fy14
-				console.log(match);
 
 				// clean up all inputs
 				var id = tidyNumber(match[1]);
@@ -110,10 +129,36 @@ var toCsv = function(rawText) {
 					fy13: fy13,
 					fy14: fy14
 				});
-				console.log(item);
+
+				return item;
 			}
 		}
+
+		return null;
 	});
+
+	// clean up by removing non-items
+	items = _.compact(items);
+
+	// turn to strings
+	var strings = _.map(items, function(item){
+		return item.toString();
+	});
+
+	// to csv
+	var csvBody = strings.join('\n');
+	var csvHead = [
+		'id',
+		'vote',
+		'program',
+		'subvote',
+		'item',
+		'fy12',
+		'fy13',
+		'fy14'
+	].join(',');
+	var csvContent = csvHead + '\n' + csvBody;
+	console.log(csvContent);
 }
 
 toCsv("VOte 07 Treasury Registrar&apos;s Oflice\nA. ESTIMATE of the amount required in the year ending 30th June, 2014, the salaries and expenses of Treasury Registrafs\nOffice\nThirty-eight billion eighty-eight million one lmmlredjorty-two thousand\n(Sims. 38,088,I42,000)\nB. Sub-Votes under which this vote will be accounted for by the Treasury Registrar, Treasury Registrar&apos;s Office ,\nare set out in the details below.\nItem Description 2011/2012 2012/2013 2013/2014\nActual Approved Estimates\nExpenditure Estimates\nShs. Shs. Shs.\nPROGRAMME 10 ADMINISTRATION\nSubvote 1001 ADMINISTRATION AND HUMAN RESOURCES MGT\n210100 Basic Salaries - Pensionable Posts 0 0 303, 192,000\n210300 Personnel Allowances - (Non-Discretionary) 0 0 176,350,000\n210400 Personnel Allowances - (Discretionary)- Optional 0 0 70,000,000\n220100 Office And General Supplies And Services 0 0 599,535,000\n220200 Utilities Supplies and Services 0 0 300,000,000\n220300 Fuel, Oils ,Lubricants 0 0 20,255,000\n220700 Rental Expenses 0 0 894,500,000\n220800 Training - Domestic 0 0 36,000,000\n220900 Training - Foreign 0 0 497,500,000\n221000 Travel - In - Country 0 0 32,500,000\n221200 Communications &amp; Information 0 0 350,000,000\n221400 Hospitality Supplies and Services 0 0 13,000,000\n229900 Other Operating Expenses 0 0 34,0 l7,5 10,000\n230400 Routine Maintenance And Repair Of Vehicles And 0 0 322,400,000\nTransportation Equipment\n230700 Routine Maintenance And Repair Of Oflice Equipment 0 0 4,400,000\nAnd Appliances\n410400 Acquisition of Specialized Equipment 0 0 300,000,000\n410500 Acquisition Of Household &amp; Institutional Equipment 0 0 1,000,000\n411000 Rehabilitation and Other Civil Works 0 0 I50,000,000\nTotal of Subvote 0 0 38,088,142,000\nTotal of Programme 0 0 38,088,M2,000\nTotal ofVote 0 0 38,088,M2,000\nLess Retention Scheme Funds 0 0 0\nNet Total of Vote 0 0 38,088,142,000\n2");
