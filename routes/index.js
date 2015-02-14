@@ -105,4 +105,19 @@ router.get('/text/:id', function(req, res, next ) {
     });
 });
 
+/* GET csv */
+router.get('/csv/:id', function(req, res, next) {
+    var id = req.params.id;
+    fs.readFile('public/csv/' + id + '.txt', 'utf8', function(err, data) {
+        if(err){
+            console.log(err);
+            res.send("");
+        }
+        else{
+            res.send(data);
+        }
+    });
+});
+
+
 module.exports = router;
