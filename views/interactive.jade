@@ -1,11 +1,19 @@
 extends layout
 
 block content
-    h1 Interactive CSV Visualizer
+    h1= title
 
-    div
-        each csv in csvs
-            p
-                !{csv}
+    .row
+        .col-sm-3
+            ul.nav.nav-pills.nav-stacked
+                each csv in csvs
+                    li
+                        a.csv(href='#', id=csv)
+                            | CSV #!{csv}
+        .col-sm-9#results-pane(style='display: none')
+            a#visualize-link.btn.btn-primary.btn-block.text-center.
+                Visualize
+            br
+            pre#csv-output
 
     script(src='/scripts/interactive.js')

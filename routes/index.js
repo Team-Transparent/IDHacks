@@ -321,11 +321,27 @@ router.get('/visualize/:id', function(req, res, next){
 
 /* interactive CSV visualizer */
 router.get('/interactive', function(req, res, next){
-    res.render('interactive', {
-        csvs: [
-            7,
-            8
-        ]
+    fs.readdir("public/csv", function(err, files){
+        if(err){
+            res.render('fail', { message: 'Failed getting files! '});
+        }
+        else{
+            // files: remove non csvs
+            files = _.filter(files, function(file){
+                return (file.indexOf(".csv") > -1)
+                    && !(file.indexOf(".") == 0)
+            });
+
+            // files: strip out .csv
+            files = _.map(files, function(file){
+                return file.replace(".csv", "");
+            });
+
+            res.render('interactive', {
+                title: 'Interactive CSV Visualizer',
+                csvs: files
+            });
+        }
     });
 });
 
