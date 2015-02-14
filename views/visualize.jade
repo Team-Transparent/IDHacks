@@ -10,13 +10,13 @@ html
     script(src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js')
     script.
       $(function(){
-      //d3.csv("./slightly_better_sample.csv", function(data) {
+      d3.csv("/csv/8", function(data) {
       L = [{ID:"TREASURY", FY12: 10, FY13: 1001, FY14:1000000},
       {ID:"TREASURY", FY12: 10, FY13: 1001, FY14:30},
       {ID:"TREASURY", FY12: 10, FY13: 1001, FY14:60},
       {ID:"TREASURY", FY12: 10, FY13: 1001, FY14:120},
       {ID:"TREASURY", FY12: 10, FY13: 1001, FY14:30}];
-      //L = data;
+      L = data;
       randomly_color_tag = function(attr, tag){
       d3.selectAll(tag).style(attr, function() {
       return "hsl(" + Math.random() * 360 + ",100%,50%)";
@@ -50,7 +50,7 @@ html
       return "<tspan x='"+radius+"' y='"+radius+"'>"+d.ID+"</tspan><tspan font-size="+1.2*get_size(d.FY14)/d.ID.length +" x='"+radius+"' y='"+second_line_y+"'> TZS "+d.FY14+"</tspan> ";
       });
       randomly_color_tag("fill", "circle");
-      // });
+      });
       });
   body
     h1(style='color:white') Tanzanian Treasury
