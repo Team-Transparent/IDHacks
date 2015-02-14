@@ -1,0 +1,1 @@
+PDF extraction: http://www.garysieling.com/blog/parsing-pdfs-at-scale-with-node-js-pdf-js-and-lunr-js
