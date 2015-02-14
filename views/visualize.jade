@@ -10,48 +10,50 @@ html
     script(src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js')
     script.
       $(function(){
-      d3.csv("/csv/8", function(data) {
-      L = [{ID:"TREASURY", FY12: 10, FY13: 1001, FY14:1000000},
-      {ID:"TREASURY", FY12: 10, FY13: 1001, FY14:30},
-      {ID:"TREASURY", FY12: 10, FY13: 1001, FY14:60},
-      {ID:"TREASURY", FY12: 10, FY13: 1001, FY14:120},
-      {ID:"TREASURY", FY12: 10, FY13: 1001, FY14:30}];
+      d3.csv("/csv/7", function(data) {
+      L = [{id:"TREASURY", fy12: 10, fy13: 1001, fy14:1000000},
+      {id:"TREASURY", fy12: 10, fy13: 1001, fy14:30},
+      {id:"TREASURY", fy12: 10, fy13: 1001, fy14:60},
+      {id:"TREASURY", fy12: 10, fy13: 1001, fy14:120},
+      {id:"TREASURY", fy12: 10, fy13: 1001, fy14:30}];
+      //id,vote,program,subvote,item,fy12,fy13,fy1
       L = data;
+      $('#vote').html(data[0].vote);
       randomly_color_tag = function(attr, tag){
       d3.selectAll(tag).style(attr, function() {
       return "hsl(" + Math.random() * 360 + ",100%,50%)";
       });
       };
       get_size = function(expense){
-      return 8*Math.log(1+expense);
-      //return 50+expense/10000000;
+      return 11*Math.log(1+expense);
       };
       var svgSelection = d3.select("body").selectAll("svg").data(L).enter().append("svg");
       svgSelection.append("circle");
       svgSelection.append("text").style("text-anchor", "middle");
-      d3.selectAll("svg").data(L).attr("width", function(d){return 2*get_size(d.FY14);});
-      d3.selectAll("svg").data(L).attr("height", function(d){return 2*get_size(d.FY14);});
+      d3.selectAll("svg").data(L).attr("width", function(d){return 2*get_size(d.fy14);});
+      d3.selectAll("svg").data(L).attr("height", function(d){return 2*get_size(d.fy14);});
       d3.selectAll("circle").data(L);
-      d3.selectAll("circle").attr("r", function(d){return get_size(d.FY14);});
-      d3.selectAll("circle").attr("cx", function(d){return get_size(d.FY14);});
-      d3.selectAll("circle").attr("cy", function(d){return get_size(d.FY14);});
+      d3.selectAll("circle").attr("r", function(d){return get_size(d.fy14);});
+      d3.selectAll("circle").attr("cx", function(d){return get_size(d.fy14);});
+      d3.selectAll("circle").attr("cy", function(d){return get_size(d.fy14);});
       d3.select("body").style("background-color", "black");
       d3.selectAll("text").data(L);
       d3.selectAll("text").style("font-size", function(d) {
-      return 2*get_size(d.FY14)/d.ID.length + "px"; });
+      return 2*get_size(d.fy14)/d.vote.length + "px"; });
       d3.selectAll("text").attr("x", function(d){
-      return get_size(d.FY14);
+      return get_size(d.fy14);
       });
       d3.selectAll("text").attr("y", function(d){
-      return get_size(d.FY14);
+      return get_size(d.fy14);
       });
       d3.selectAll("text").html(function(d){
-      var radius = get_size(d.FY14);
-      var second_line_y = radius+2*get_size(d.FY14)/d.ID.length;
-      return "<tspan x='"+radius+"' y='"+radius+"'>"+d.ID+"</tspan><tspan font-size="+1.2*get_size(d.FY14)/d.ID.length +" x='"+radius+"' y='"+second_line_y+"'> TZS "+d.FY14+"</tspan> ";
+      var radius = get_size(d.fy14);
+      var second_line_y = radius+3*get_size(d.fy14)/d.vote.length;
+      var third_line_y = radius+9*get_size(d.fy14)/d.vote.length;
+      return "<tspan font-size="+3*get_size(d.fy14)/d.vote.length +" x='"+radius+"' y='"+radius+"'>"+d.subvote+"</tspan><tspan font-size="+3*get_size(d.fy14)/d.vote.length +" x='"+radius+"' y='"+second_line_y+"'> TZS "+d.item+"</tspan><tspan font-size="+5*get_size(d.fy14)/d.vote.length +" x='"+radius+"' y='"+third_line_y+"'> TZS "+d.fy14+"</tspan> ";
       });
       randomly_color_tag("fill", "circle");
       });
       });
   body
-    h1(style='color:white') Tanzanian Treasury
+    h1#vote(style='color:white') Tanzanian Treasury
