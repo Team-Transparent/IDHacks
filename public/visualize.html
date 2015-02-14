@@ -10,11 +10,11 @@
 <script>
     $(function(){
         //d3.csv("./slightly_better_sample.csv", function(data) {
-            L = [{vote:"TREASURY", programme: 10, subvote: 1001, expense:1000000},
-                 {vote:"TREASURY", programme: 10, subvote: 1001, expense:30},
-                 {vote:"TREASURY", programme: 10, subvote: 1001, expense:60},
-                 {vote:"TREASURY", programme: 10, subvote: 1001, expense:120},
-                 {vote:"TREASURY", programme: 10, subvote: 1001, expense:30}];
+            L = [{ID:"TREASURY", FY12: 10, FY13: 1001, FY14:1000000},
+                 {ID:"TREASURY", FY12: 10, FY13: 1001, FY14:30},
+                 {ID:"TREASURY", FY12: 10, FY13: 1001, FY14:60},
+                 {ID:"TREASURY", FY12: 10, FY13: 1001, FY14:120},
+                 {ID:"TREASURY", FY12: 10, FY13: 1001, FY14:30}];
             //L = data;
             randomly_color_tag = function(attr, tag){
                 d3.selectAll(tag).style(attr, function() {
@@ -24,18 +24,29 @@
             get_size = function(expense){
                 return 8*Math.log(1+expense);
             };
-            randomly_color_tag("color", "p");
+            
+            d3.selectAll("svg").data(L).attr("width", function(d){return 2*get_size(d.FY14);});
+            d3.selectAll("svg").data(L).attr("height", function(d){return 2*get_size(d.FY14);});
+            d3.selectAll("circle").data(L);
+            d3.selectAll("circle").attr("r", function(d){return get_size(d.FY14);});
+            d3.selectAll("circle").attr("cx", function(d){return get_size(d.FY14);});
+            d3.selectAll("circle").attr("cy", function(d){return get_size(d.FY14);});
+
             d3.select("body").style("background-color", "black");
             d3.selectAll("text").data(L);
             d3.selectAll("text").style("font-size", function(d) { 
-                return 2*get_size(d.expense)/d.vote.length + "px"; });
-            d3.selectAll("text").html(function(d){
-                var second_line_y = 150+2*get_size(d.expense)/d.vote.length;
-                return "<tspan x='150' y='150'>"+d.vote+"</tspan><tspan x='150' y='"+second_line_y+"'>"+d.expense+"</tspan> ";
+                return 2*get_size(d.FY14)/d.ID.length + "px"; });
+            d3.selectAll("text").attr("x", function(d){
+                return get_size(d.FY14);
             });
-
-            d3.selectAll("circle").data(L);
-            d3.selectAll("circle").attr("r", function(d){return get_size(d.expense)});
+            d3.selectAll("text").attr("y", function(d){
+                return get_size(d.FY14);
+            });
+            d3.selectAll("text").html(function(d){
+                var radius = get_size(d.FY14);
+                var second_line_y = radius+2*get_size(d.FY14)/d.ID.length;
+                return "<tspan x='"+radius+"' y='"+radius+"'>"+d.ID+"</tspan><tspan font-size="+1.2*get_size(d.FY14)/d.ID.length +" x='"+radius+"' y='"+second_line_y+"'> TZS "+d.FY14+"</tspan> ";
+            });
             randomly_color_tag("fill", "circle");
        // });
     });
