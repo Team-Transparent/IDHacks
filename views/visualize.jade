@@ -24,6 +24,7 @@ html
       };
       get_size = function(expense){
       return 8*Math.log(1+expense);
+      //return 50+expense/10000000;
       };
       var svgSelection = d3.select("body").selectAll("svg").data(L).enter().append("svg");
       svgSelection.append("circle");

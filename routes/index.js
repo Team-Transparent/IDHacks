@@ -72,9 +72,9 @@ function makeCSV(input, outputfile) {
         fy14: int
 
 */
-var csvItem = function(in) {
-    _.extend(in, this)
-}
+// var csvItem = function(in) {
+//     _.extend(in, this)
+// }
 
 var toCsv = function(rawText) {
     var inLines = rawText.split("\n");
