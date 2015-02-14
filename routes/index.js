@@ -5,26 +5,7 @@ var _ = require('underscore');
 
 var router = express.Router();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
-
-/* GET list of PDFs */
-router.get('/list', function(req, res, next){
-    fs.readdir("public/pdf", function(err, files){
-        if(err){
-            res.render('fail', {message: 'Error getting file list!'});
-        }
-        else{
-            res.render('pdflist', {files: files});
-        }
-    });
-});
-
-/* GET text from PDF */
-router.get('/upload/:id', function(req, res, next ) {
-    var pdfId = req.params.id;
+var convertPdf = function(pdfId, success, failure) {
     var filename = "public/pdf/" + pdfId + ".pdf";
     console.log('PDF ID =', pdfId);
 
@@ -52,18 +33,60 @@ router.get('/upload/:id', function(req, res, next ) {
                     var text = _(data.text_block).pluck('text').join('\n');
                     console.log("Text =", text);
 
-                    res.render('dump', { text: text });
+                    // res.render('dump', { text: text });
+                    if(success){ success(text); };
                 });
             }
             else {
-                res.render('fail', { message: 'Error parsing PDF!'})
+                // res.render('fail', { message: 'Error parsing PDF!'})
+                if(failure){ failure(); };
             }
         });
     });
+}
+
+/* GET home page. */
+router.get('/', function(req, res, next) {
+  res.render('index', { title: 'Express' });
 });
 
-router.get('/ocr', function(req, res, next){
+/* GET list of PDFs */
+router.get('/list', function(req, res, next){
+    fs.readdir("public/pdf", function(err, files){
+        // filter out non-pdfs and hidden files
+        files = _.filter(files, function(file){
+            return (file.indexOf(".pdf") > -1)
+                && !(file.indexOf(".") == 0)
+        });
 
+        if(err){
+            res.render('fail', {message: 'Error getting file list!'});
+        }
+        else{
+            res.render('pdflist', {files: files});
+        }
+    });
+});
+
+/* Turns PDF into CSV  */
+router.get('/convert/:id', function(req, res, next ) {
+    var pdfId = req.params.id;
+    convertPdf(pdfId, function success(text) {
+        res.render('dump', { text: text });
+    }, function failure(){
+        res.render('fail', { message: 'Error parsing PDF!'});
+    });
+});
+
+
+/* GET text from PDF */
+router.get('/text/:id', function(req, res, next ) {
+    var pdfId = req.params.id;
+    convertPdf(pdfId, function success(text) {
+        res.render('dump', { text: text });
+    }, function failure(){
+        res.render('fail', { message: 'Error parsing PDF!'});
+    });
 });
 
 module.exports = router;

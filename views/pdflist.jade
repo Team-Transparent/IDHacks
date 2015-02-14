@@ -1,7 +1,13 @@
 extends layout
 
 block content
-  h1 Select PDF files to load
-  ul
-    each file in files
-        li= file
+    h1 Select PDF files to load
+
+    div
+        each file in files
+            p
+                button(class='btn btn-default upload' value=file)
+                    span(class='glyphicon glyphicon-refresh').
+                !{file}
+
+    script(src='/scripts/list.js')
