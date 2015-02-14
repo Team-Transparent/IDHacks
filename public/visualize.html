@@ -9,30 +9,32 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 <script>
     $(function(){
-        L = [{vote:"TREASURY", programme: 10, subvote: 1001, expense:90},
-             {vote:"TREASURY", programme: 10, subvote: 1001, expense:30},
-             {vote:"TREASURY", programme: 10, subvote: 1001, expense:60},
-             {vote:"TREASURY", programme: 10, subvote: 1001, expense:120},
-             {vote:"TREASURY", programme: 10, subvote: 1001, expense:30}];
-        randomly_color_tag = function(attr, tag){
-            d3.selectAll(tag).style(attr, function() {
-                return "hsl(" + Math.random() * 360 + ",100%,50%)";
+        d3.csv("./slightly_better_sample.csv", function(data) {
+            L = [{vote:"TREASURY", programme: 10, subvote: 1001, expense:90},
+                 {vote:"TREASURY", programme: 10, subvote: 1001, expense:30},
+                 {vote:"TREASURY", programme: 10, subvote: 1001, expense:60},
+                 {vote:"TREASURY", programme: 10, subvote: 1001, expense:120},
+                 {vote:"TREASURY", programme: 10, subvote: 1001, expense:30}];
+            L = data;
+            randomly_color_tag = function(attr, tag){
+                d3.selectAll(tag).style(attr, function() {
+                    return "hsl(" + Math.random() * 360 + ",100%,50%)";
+                });
+            };
+            randomly_color_tag("color", "p");
+            d3.select("body").style("background-color", "black");
+            d3.selectAll("text").data(L);
+            d3.selectAll("text").style("font-size", function(d) { 
+                return 2*Math.log(1+d.expense)/d.vote.length + "px"; });
+            d3.selectAll("text").html(function(d){
+                var second_line_y = 150+2*Math.log(1+d.expense)/d.vote.length;
+                return "<tspan x='150' y='150'>"+d.vote+"</tspan><tspan x='150' y='"+second_line_y+"'>"+d.expense+"</tspan> ";
             });
-        };
-        randomly_color_tag("color", "p");
-        d3.select("body").style("background-color", "black");
 
-        d3.selectAll("text").data(L);
-        d3.selectAll("text").style("font-size", function(d) { return 2*d.expense/d.vote.length + "px"; });
-        d3.selectAll("text").html(function(d){
-            var second_line_y = 150+2*d.expense/d.vote.length;
-            return "<tspan x='150' y='150'>"+d.vote+"</tspan><tspan x='150' y='"+second_line_y+"'>"+d.expense+"</tspan> ";
+            d3.selectAll("circle").data(L);
+            d3.selectAll("circle").attr("r", function(d){return Math.log(1+d.expense)});
+            randomly_color_tag("fill", "circle");
         });
-
-        d3.selectAll("circle").data(L);
-        d3.selectAll("circle").attr("r", function(d){return d.expense});
-        randomly_color_tag("fill", "circle");
-
     });
 </script>
 </head>
