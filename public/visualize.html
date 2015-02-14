@@ -25,7 +25,6 @@
             };
             get_size = function(expense){
                 return 8*Math.log(1+expense);
-                //50+expense/1000000
             };
             var svgSelection = d3.select("body").selectAll("svg").data(L).enter().append("svg");
             svgSelection.append("circle");
