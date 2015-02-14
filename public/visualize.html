@@ -9,32 +9,35 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 <script>
     $(function(){
-        d3.csv("./slightly_better_sample.csv", function(data) {
-            L = [{vote:"TREASURY", programme: 10, subvote: 1001, expense:90},
+        //d3.csv("./slightly_better_sample.csv", function(data) {
+            L = [{vote:"TREASURY", programme: 10, subvote: 1001, expense:1000000},
                  {vote:"TREASURY", programme: 10, subvote: 1001, expense:30},
                  {vote:"TREASURY", programme: 10, subvote: 1001, expense:60},
                  {vote:"TREASURY", programme: 10, subvote: 1001, expense:120},
                  {vote:"TREASURY", programme: 10, subvote: 1001, expense:30}];
-            L = data;
+            //L = data;
             randomly_color_tag = function(attr, tag){
                 d3.selectAll(tag).style(attr, function() {
                     return "hsl(" + Math.random() * 360 + ",100%,50%)";
                 });
             };
+            get_size = function(expense){
+                return 8*Math.log(1+expense);
+            };
             randomly_color_tag("color", "p");
             d3.select("body").style("background-color", "black");
             d3.selectAll("text").data(L);
             d3.selectAll("text").style("font-size", function(d) { 
-                return 2*Math.log(1+d.expense)/d.vote.length + "px"; });
+                return 2*get_size(d.expense)/d.vote.length + "px"; });
             d3.selectAll("text").html(function(d){
-                var second_line_y = 150+2*Math.log(1+d.expense)/d.vote.length;
+                var second_line_y = 150+2*get_size(d.expense)/d.vote.length;
                 return "<tspan x='150' y='150'>"+d.vote+"</tspan><tspan x='150' y='"+second_line_y+"'>"+d.expense+"</tspan> ";
             });
 
             d3.selectAll("circle").data(L);
-            d3.selectAll("circle").attr("r", function(d){return Math.log(1+d.expense)});
+            d3.selectAll("circle").attr("r", function(d){return get_size(d.expense)});
             randomly_color_tag("fill", "circle");
-        });
+       // });
     });
 </script>
 </head>
