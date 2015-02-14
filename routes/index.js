@@ -83,19 +83,31 @@ router.get('/list', function(req, res, next){
     });
 });
 
-/* Turns PDF into CSV. Only for Ajax! */
+/* Turns PDF into CSV and returns it. Only for Ajax! */
 router.get('/convert/:id', function(req, res, next ) {
     var pdfId = req.params.id;
     convertPdf(pdfId, function success(text) {
+        // TODO only convert if no CSV yet
+        // return CSV stuff either way
         makeCSV(text, "public/csv/" + pdfId);
-        res.send(text);
+
+        // returns the CSV content
+        fs.readFile('public/csv/' + pdfId + '.txt', 'utf8', function(err, data) {
+            if(err){
+                console.log(err);
+                res.send("");
+            }
+            else{
+                res.send(data);
+            }
+        });
     }, function failure(){
         res.send('Error parsing PDF!');
     });
 });
 
 
-/* GET text from PDF */
+/* GET text from PDF in human-readable format */
 router.get('/text/:id', function(req, res, next ) {
     var pdfId = req.params.id;
     convertPdf(pdfId, function success(text) {
@@ -105,7 +117,7 @@ router.get('/text/:id', function(req, res, next ) {
     });
 });
 
-/* GET csv */
+/* GET raw csv data */
 router.get('/csv/:id', function(req, res, next) {
     var id = req.params.id;
     fs.readFile('public/csv/' + id + '.txt', 'utf8', function(err, data) {
