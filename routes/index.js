@@ -315,8 +315,8 @@ router.get('/csv/:id', function(req, res, next) {
 });
 
 /* GET Visualize */
-router.get('/visualize', function(req, res, next){
-    res.render('visualize', {});
+router.get('/visualize/:id', function(req, res, next){
+    res.render('visualize', {vote: req.params.id});
 });
 
 /* interactive CSV visualizer */
