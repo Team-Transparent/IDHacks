@@ -2,3 +2,8 @@ extends layout
 
 block content
     h1 Interactive CSV Visualizer
+
+    div
+        each csv in csvs
+            p
+                !{csv}
