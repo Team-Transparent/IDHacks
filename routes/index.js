@@ -66,6 +66,17 @@ var tidyNumber = function(numberString){
 }
 
 /*
+    Based on the regex that matches numerical misidentifications,
+    fixes up the string and returns it.
+*/
+var saveNumbers = function(str, regex, formula){
+    while(str.match(regex)){
+        str = str.replace(regex, formula);
+    }
+    return str;
+}
+
+/*
     Converts the given raw text (readout from pdf) into a CSV-formatted string.
 */
 var toCsv = function(rawText) {
@@ -77,13 +88,26 @@ var toCsv = function(rawText) {
     var subvoteRegex = /^subvote \d+ ([\s\S]+)$/ig;
     var itemRegex = /^(\d{6}) ([^\d]*) ([\d.,]*) ([\d.,]*) ([\d.,]*)$/ig;
 
+    // to clean up numbers
+    var save1 = /([li]+) ?(\d)/ig;
+    var save1_before = /(\d) ?([li]+)/ig;
+
     // these are thing to keep track of as we go through each item
     var vote, program, subvote;
 
     // sanitize each line
     inlines = _.map(inlines, function(line){
+        // replace all stuff that looks like 1's with bona fide 1's
+        line = saveNumbers(line, save1, function(match, p1, p2){
+            return "1" + p2;
+        });
+        line = saveNumbers(line, save1_before, function(match, p1, p2){
+            return p1 + "1";
+        });
         return line;
     });
+
+    console.log(inlines);
 
     // first find vote name
     // loop through ENTIRE file for this just to be sure because this is vital
@@ -197,7 +221,7 @@ var convertPdf = function(pdfId, success, failure) {
                 }).on("complete", function(data) {
                     // grab text from data
                     var text = _(data.text_block).pluck('text').join('\n');
-                    console.log("Text =", text);
+                    // console.log("Text =", text);
 
                     // res.render('dump', { text: text });
                     if(success){ success(text); };
@@ -205,6 +229,7 @@ var convertPdf = function(pdfId, success, failure) {
             }
             else {
                 // res.render('fail', { message: 'Error parsing PDF!'})
+                console.log('Failure!');
                 if(failure){ failure(); };
             }
         });
