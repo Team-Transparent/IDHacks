@@ -119,5 +119,9 @@ router.get('/csv/:id', function(req, res, next) {
     });
 });
 
+/* GET Visualize */
+router.get('/visualize', function(req, res, next){
+    res.render('visualize', {});
+});
 
 module.exports = router;
