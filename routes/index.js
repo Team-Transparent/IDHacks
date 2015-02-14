@@ -62,28 +62,56 @@ var tidy = function(item){
 var tidyNumber = function(numberString){
     numberString = numberString.replace(/[., ]/g, '');
     var number = parseInt(numberString);
+    if(isNaN(number)){
+        number = 0;
+    }
+
     return number;
+}
+
+/*
+    Based on the regex that matches numerical misidentifications,
+    fixes up the string and returns it.
+*/
+var saveNumbers = function(str, regex, formula){
+    while(str.match(regex)){
+        str = str.replace(regex, formula);
+    }
+    return str;
 }
 
 /*
     Converts the given raw text (readout from pdf) into a CSV-formatted string.
 */
-var toCsv = function(rawText) {
+var toCsv = function(rawText, voteId) {
     var inlines = rawText.split("\n");
 
     // regex list
-    var voteRegex = /^vote \d+ ([\s\S]+)$/ig;
-    var programRegex = /^programme \d+ ([\s\S]+)$/ig;
-    var subvoteRegex = /^subvote \d+ ([\s\S]+)$/ig;
+    var voteRegex = /^vote \w+ ([\s\S]+)$/ig;
+    var programRegex = /^programme \w+ ([\s\S]+)$/ig;
+    var subvoteRegex = /^subvote \w+ ([\s\S]+)$/ig;
     var itemRegex = /^(\d{6}) ([^\d]*) ([\d.,]*) ([\d.,]*) ([\d.,]*)$/ig;
+
+    // to clean up numbers
+    var save1 = /([li]+) ?(\d)/ig;
+    var save1_before = /(\d) ?([li]+)/ig;
 
     // these are thing to keep track of as we go through each item
     var vote, program, subvote;
 
     // sanitize each line
     inlines = _.map(inlines, function(line){
+        // replace all stuff that looks like 1's with bona fide 1's
+        line = saveNumbers(line, save1, function(match, p1, p2){
+            return "1" + p2;
+        });
+        line = saveNumbers(line, save1_before, function(match, p1, p2){
+            return p1 + "1";
+        });
         return line;
     });
+
+    console.log(inlines);
 
     // first find vote name
     // loop through ENTIRE file for this just to be sure because this is vital
@@ -111,17 +139,22 @@ var toCsv = function(rawText) {
         }
 
         // now we can check for items
-        if(vote && program && subvote){
+        if(vote){
             match = itemRegex.exec(line);
             if(match){
-                // id, itemName, fy12, fy13, fy14
+                // itemId, itemName, fy12, fy13, fy14
+                // NOTE itemId is no longer used
 
                 // clean up all inputs
-                var id = tidyNumber(match[1]);
+                var id = voteId;
                 var itemName = tidy(match[2]);
                 var fy12 = tidyNumber(match[3]);
                 var fy13 = tidyNumber(match[4]);
                 var fy14 = tidyNumber(match[5]);
+
+                // program and subvote are OPTIONAL!
+                program = program || "(unknown)";
+                subvote = subvote || "(unknown)";
 
                 vote = tidy(vote);
                 program = tidy(program);
@@ -197,7 +230,7 @@ var convertPdf = function(pdfId, success, failure) {
                 }).on("complete", function(data) {
                     // grab text from data
                     var text = _(data.text_block).pluck('text').join('\n');
-                    console.log("Text =", text);
+                    // console.log("Text =", text);
 
                     // res.render('dump', { text: text });
                     if(success){ success(text); };
@@ -238,7 +271,7 @@ router.get('/list', function(req, res, next){
 router.get('/convert/:id', function(req, res, next ) {
     var pdfId = req.params.id;
     convertPdf(pdfId, function success(text) {
-        var csvContent = toCsv(text);
+        var csvContent = toCsv(text, pdfId);
         console.log(csvContent);
 
         // save to file
