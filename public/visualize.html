@@ -10,7 +10,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 <script>
     $(function(){
-        d3.csv("/csv/7", function(data) {
+        d3.csv("/csv/#{vote}", function(data) {
             L = [{id:"TREASURY", fy12: 10, fy13: 1001, fy14:1000000},
                  {id:"TREASURY", fy12: 10, fy13: 1001, fy14:30},
                  {id:"TREASURY", fy12: 10, fy13: 1001, fy14:60},
