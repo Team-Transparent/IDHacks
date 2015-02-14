@@ -60,26 +60,6 @@ function makeCSV(input, outputfile) {
     }
 }
 
-/*
-    Creates a CSV item. Pass an object containing:
-        id: int
-        vote: string
-        program: string
-        subvote: string
-        itemName: string
-        fy12: int
-        fy13: int
-        fy14: int
-
-*/
-var csvItem = function(in) {
-    _.extend(in, this)
-}
-
-var toCsv = function(rawText) {
-    var inLines = rawText.split("\n");
-}
-
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
