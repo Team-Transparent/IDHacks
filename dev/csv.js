@@ -26,6 +26,15 @@ var csvItem = function(input) {
 var toCsv = function(rawText) {
     var inlines = rawText.split("\n");
     
+    // these are thing to keep track of as we go through each itemm
+    var vote, program, subvote;
+    
+    // first find vote name
+    // loop through ENTIRE file for this just to be sure because this is vital
+    _.each(inlines, function(line){
+    	
+    });
+    
     console.log(new csvItem({fy12: "hi"}));
 }
 
