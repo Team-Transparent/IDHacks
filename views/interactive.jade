@@ -11,13 +11,15 @@ block content
                         a.csv(href='#', id=csv)
                             | CSV #!{csv}
         .col-sm-9#results-pane(style='display: none')
-            a#visualize-link.btn.btn-primary.btn-block.
-                Visualize
+            a#visualize-link.btn.btn-lg.btn-primary.btn-block
+                span.fa.fa-pie-chart
+                |  Visualize
             br
 
-            a#download-link.btn.btn-default.btn-block.
+            a#download-link.btn.btn-default.btn-block
                 span.fa.fa-download
-                Download CSV
+                |  Download CSV
+
             pre#csv-output
 
     script(src='/scripts/interactive.js')

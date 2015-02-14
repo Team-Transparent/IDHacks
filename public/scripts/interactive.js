@@ -15,4 +15,5 @@ function populate(data, id){
     $('#results-pane').show();
     $('#csv-output').html(data);
     $('#visualize-link').attr('href', '/visualize/' + id);
+    $('#download-link').attr('href', 'csv/' + id + '.csv').attr('download', 'vote-' + id + '.csv');
 }
