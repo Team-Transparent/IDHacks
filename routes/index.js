@@ -62,6 +62,10 @@ var tidy = function(item){
 var tidyNumber = function(numberString){
     numberString = numberString.replace(/[., ]/g, '');
     var number = parseInt(numberString);
+    if(isNaN(number)){
+        number = 0;
+    }
+
     return number;
 }
 
@@ -79,13 +83,13 @@ var saveNumbers = function(str, regex, formula){
 /*
     Converts the given raw text (readout from pdf) into a CSV-formatted string.
 */
-var toCsv = function(rawText) {
+var toCsv = function(rawText, voteId) {
     var inlines = rawText.split("\n");
 
     // regex list
-    var voteRegex = /^vote \d+ ([\s\S]+)$/ig;
-    var programRegex = /^programme \d+ ([\s\S]+)$/ig;
-    var subvoteRegex = /^subvote \d+ ([\s\S]+)$/ig;
+    var voteRegex = /^vote \w+ ([\s\S]+)$/ig;
+    var programRegex = /^programme \w+ ([\s\S]+)$/ig;
+    var subvoteRegex = /^subvote \w+ ([\s\S]+)$/ig;
     var itemRegex = /^(\d{6}) ([^\d]*) ([\d.,]*) ([\d.,]*) ([\d.,]*)$/ig;
 
     // to clean up numbers
@@ -135,17 +139,22 @@ var toCsv = function(rawText) {
         }
 
         // now we can check for items
-        if(vote && program && subvote){
+        if(vote){
             match = itemRegex.exec(line);
             if(match){
-                // id, itemName, fy12, fy13, fy14
+                // itemId, itemName, fy12, fy13, fy14
+                // NOTE itemId is no longer used
 
                 // clean up all inputs
-                var id = tidyNumber(match[1]);
+                var id = voteId;
                 var itemName = tidy(match[2]);
                 var fy12 = tidyNumber(match[3]);
                 var fy13 = tidyNumber(match[4]);
                 var fy14 = tidyNumber(match[5]);
+
+                // program and subvote are OPTIONAL!
+                program = program || "(unknown)";
+                subvote = subvote || "(unknown)";
 
                 vote = tidy(vote);
                 program = tidy(program);
@@ -229,7 +238,6 @@ var convertPdf = function(pdfId, success, failure) {
             }
             else {
                 // res.render('fail', { message: 'Error parsing PDF!'})
-                console.log('Failure!');
                 if(failure){ failure(); };
             }
         });
@@ -263,7 +271,7 @@ router.get('/list', function(req, res, next){
 router.get('/convert/:id', function(req, res, next ) {
     var pdfId = req.params.id;
     convertPdf(pdfId, function success(text) {
-        var csvContent = toCsv(text);
+        var csvContent = toCsv(text, pdfId);
         console.log(csvContent);
 
         // save to file
