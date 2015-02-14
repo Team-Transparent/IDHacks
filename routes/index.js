@@ -2,8 +2,174 @@ var express = require('express');
 var fs = require('fs');
 var restler = require('restler');
 var _ = require('underscore');
+_.mixin(require('underscore.inflections'));
 
 var router = express.Router();
+
+
+/*
+    Creates a CSV item. Pass an object containing:
+        id: int
+        vote: string
+        program: string
+        subvote: string
+        itemName: string
+        fy12: int
+        fy13: int
+        fy14: int
+
+*/
+var csvItem = function(input) {
+    this.id = input.id;
+    this.vote = input.vote;
+    this.program = input.program;
+    this.subvote = input.subvote;
+    this.itemName = input.itemName;
+    this.fy12 = input.fy12;
+    this.fy13 = input.fy13;
+    this.fy14 = input.fy14;
+}
+csvItem.prototype.toString = function(){
+    var data = [
+        this.id,
+        this.vote,
+        this.program,
+        this.subvote,
+        this.itemName,
+        this.fy12,
+        this.fy13,
+        this.fy14
+    ];
+    var str = data.join(',');
+    return str;
+}
+
+// Cleans up the given input string.
+var tidy = function(item){
+    item = item.toLowerCase();
+    item = _.titleize(item);
+
+    // commas mess up csv so get rid of them
+    item = item.replace(/,/g, '');
+
+    // remove duplicate spaces
+    item = item.replace(/\s+/g, ' ');
+
+    return item;
+}
+
+// Cleans up the given number.
+var tidyNumber = function(numberString){
+    numberString = numberString.replace(/[., ]/g, '');
+    var number = parseInt(numberString);
+    return number;
+}
+
+/*
+    Converts the given raw text (readout from pdf) into a CSV-formatted string.
+*/
+var toCsv = function(rawText) {
+    var inlines = rawText.split("\n");
+
+    // regex list
+    var voteRegex = /^vote \d+ ([\s\S]+)$/ig;
+    var programRegex = /^programme \d+ ([\s\S]+)$/ig;
+    var subvoteRegex = /^subvote \d+ ([\s\S]+)$/ig;
+    var itemRegex = /^(\d{6}) ([^\d]*) ([\d.,]*) ([\d.,]*) ([\d.,]*)$/ig;
+
+    // these are thing to keep track of as we go through each item
+    var vote, program, subvote;
+
+    // sanitize each line
+    inlines = _.map(inlines, function(line){
+        return line;
+    });
+
+    // first find vote name
+    // loop through ENTIRE file for this just to be sure because this is vital
+    _.each(inlines, function(line){
+        if(!vote){
+            var match = voteRegex.exec(line);
+            if (match){
+                vote = match[1];
+            }
+        }
+    });
+
+    // now loop over to each item
+    var items = _.map(inlines, function(line){
+        // check for program
+        var match = programRegex.exec(line);
+        if(match){
+            program = match[1];
+        }
+
+        // check for subvote
+        match = subvoteRegex.exec(line);
+        if(match){
+            subvote = match[1];
+        }
+
+        // now we can check for items
+        if(vote && program && subvote){
+            match = itemRegex.exec(line);
+            if(match){
+                // id, itemName, fy12, fy13, fy14
+
+                // clean up all inputs
+                var id = tidyNumber(match[1]);
+                var itemName = tidy(match[2]);
+                var fy12 = tidyNumber(match[3]);
+                var fy13 = tidyNumber(match[4]);
+                var fy14 = tidyNumber(match[5]);
+
+                vote = tidy(vote);
+                program = tidy(program);
+                subvote = tidy(subvote);
+
+                // add item
+                var item = new csvItem({
+                    id: id,
+                    vote: vote,
+                    program: program,
+                    subvote: subvote,
+                    itemName: itemName,
+                    fy12: fy12,
+                    fy13: fy13,
+                    fy14: fy14
+                });
+
+                return item;
+            }
+        }
+
+        return null;
+    });
+
+    // clean up by removing non-items
+    items = _.compact(items);
+
+    // turn to strings
+    var strings = _.map(items, function(item){
+        return item.toString();
+    });
+
+    // to csv
+    var csvBody = strings.join('\n');
+    var csvHead = [
+        'id',
+        'vote',
+        'program',
+        'subvote',
+        'item',
+        'fy12',
+        'fy13',
+        'fy14'
+    ].join(',');
+    var csvContent = csvHead + '\n' + csvBody;
+
+    return csvContent;
+}
 
 var convertPdf = function(pdfId, success, failure) {
     var filename = "public/pdf/" + pdfId + ".pdf";
@@ -45,21 +211,6 @@ var convertPdf = function(pdfId, success, failure) {
     });
 }
 
-function makeCSV(input, outputfile) {
-    var array = input.split("\n");
-    fs.writeFile(outputfile + '.txt', 'ID,FY12,FY13,FY14\r\n')
-    for (i in array) {
-        last = array[i].length - 1;
-        if (!isNaN(array[i][0]) && !isNaN(array[i][last])) { // only writes out lines that begin and end with numbers
-            parsedline = array[i].replace(/[^\d\s]/g, ''); //remove all non-numerical characters and double spaces from line
-            condnsline = parsedline.replace(/\s+/g, ' '); // cut out excess space
-            csvline = condnsline.replace(/\s/g, ',') + '\r\n';
-            console.log(csvline);
-            fs.appendFile(outputfile + '.txt', csvline);
-        }
-    }
-}
-
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
@@ -83,22 +234,21 @@ router.get('/list', function(req, res, next){
     });
 });
 
-/* Turns PDF into CSV and returns it. Only for Ajax! */
+/* Turns PDF into CSV and returns the CSV text. */
 router.get('/convert/:id', function(req, res, next ) {
     var pdfId = req.params.id;
     convertPdf(pdfId, function success(text) {
-        // TODO only convert if no CSV yet
-        // return CSV stuff either way
-        makeCSV(text, "public/csv/" + pdfId);
+        var csvContent = toCsv(text);
+        console.log(csvContent);
 
-        // returns the CSV content
-        fs.readFile('public/csv/' + pdfId + '.txt', 'utf8', function(err, data) {
+        // save to file
+        fs.writeFile('public/csv/' + pdfId + '.csv', csvContent, function(err, data){
             if(err){
                 console.log(err);
-                res.send("");
+                res.send('Error saving file!');
             }
             else{
-                res.send(data);
+                res.send(csvContent);
             }
         });
     }, function failure(){
@@ -117,10 +267,10 @@ router.get('/text/:id', function(req, res, next ) {
     });
 });
 
-/* GET raw csv data */
+/* GET straight-up csv data from a CSV file that you already know exists */
 router.get('/csv/:id', function(req, res, next) {
     var id = req.params.id;
-    fs.readFile('public/csv/' + id + '.txt', 'utf8', function(err, data) {
+    fs.readFile('public/csv/' + id + '.csv', 'utf8', function(err, data) {
         if(err){
             console.log(err);
             res.send("");
