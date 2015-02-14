@@ -10,6 +10,19 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+/* GET list of PDFs */
+router.get('/list', function(req, res, next){
+    fs.readdir("public/pdf", function(err, files){
+        if(err){
+            res.render('fail', {message: 'Error getting file list!'});
+        }
+        else{
+            res.render('pdflist', {files: files});
+        }
+    });
+});
+
+/* GET text from PDF */
 router.get('/upload/:id', function(req, res, next ) {
     var pdfId = req.params.id;
     var filename = "public/pdf/" + pdfId + ".pdf";
@@ -38,6 +51,7 @@ router.get('/upload/:id', function(req, res, next ) {
                     // grab text from data
                     var text = _(data.text_block).pluck('text').join('\n');
                     console.log("Text =", text);
+
                     res.render('dump', { text: text });
                 });
             }
