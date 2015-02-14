@@ -1,0 +1,82 @@
+<html>
+<head>
+<!-- jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<!-- d3 -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<!-- jQuery UI -->
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+<script>
+    $(function(){
+		var scale = 1500000;
+		bar_chart = function(results, cname){
+			for (var i=0; i< results.length; i++) {
+			var bar = d3.select(cname);
+			var div = bar.append("div");
+			};
+			
+			var info = d3.select(cname).selectAll("div");
+			info.data(results)
+			.style("color", "black")
+			.style("background-color", function() {
+					return "hsl(" + Math.random() * 360 + ",100%,50%)";
+			})
+			.style("font", "10px sans-serif")
+			.style("text-align", "right")
+			.style("padding", "3px")
+			.style("margin", "1px");
+			
+			return info;
+		};
+		
+        d3.select("body").style("background-color", "white");
+		
+		var hashID = document.URL;
+		var splitID = hashID.split("#");
+		var csvID = splitID[1];
+		
+		d3.csv("/csv/" + csvID +".csv", function(ds){
+		var R = ds;			
+		var b2 = bar_chart(R, ".bar2");
+		b2.style("width", function(d) { return d.fy12/scale + "px"; })
+		.html(function(d){return d.fy12;});
+		
+		//d3.select(".b2amt").selectAll("div")
+		//.html("Hello, world2!");
+		
+		var b3 = bar_chart(R, ".bar3");
+		b3.style("width", function(d) { return d.fy13/scale + "px"; })
+		.html(function(d){return d.fy13;});
+		
+		var b4 = bar_chart(R, ".bar4");
+		b4.style("width", function(d) { return d.fy14/scale + "px"; })
+		.html(function(d){return d.fy14;});
+
+		b2.data("").enter().append("div")
+		.text(function(d) { return d; });
+		});
+		
+		});
+</script>
+<!--style>
+
+.chart div {
+  font: 10px sans-serif;
+  background-color: steelblue;
+  text-align: right;
+  padding: 3px;
+  margin: 1px;
+  color: white;
+}
+
+</style-->
+</head>
+<body>	
+
+  <span class="bar2">FY12</span><span class="b2amt"><div></div></span>
+  <span class="bar3">FY13</span><span class="b3amt"></span>
+  <span class="bar4">FY14</span><span class="b4amt"></span>
+  
+</body>
+</html>
