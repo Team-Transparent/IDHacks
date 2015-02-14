@@ -10,13 +10,17 @@ block content
                     li
                         a.csv(href='#', id=csv)
                             | CSV #!{csv}
+        .col-sm-9#results-placeholder.text-center.well
+            span.fa.fa-pie-chart.text-success.fa-4x
+            h3
+                | Click a CSV on the left to view it and visualize it.
         .col-sm-9#results-pane(style='display: none')
             a#visualize-link.btn.btn-lg.btn-primary.btn-block
                 span.fa.fa-pie-chart
                 |  Visualize
             br
 
-            a#download-link.btn.btn-default.btn-block
+            a#download-link.btn.btn-success.btn-block
                 span.fa.fa-download
                 |  Download CSV
 

@@ -1,5 +1,26 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+    .jumbotron
+        h2.text-center
+            span.fa.fa-pie-chart.fa-5x.text-center.text-success
+        h1.text-center
+            strong.text-success= title
+        h2.text-center
+            | Visualize Tanzanian government data.
+
+    p.lead
+        | The Tanzanian government publishes <strong>"open" government data</strong> like this:
+        img.text-center.center.img-responsive(src='img/pdf.png', style='max-height: 400px')
+        | But we want you to be able to <strong>visualize it, parse it, and hack it.</strong>
+        | In CSV format. So it's <strong>open and machine-readable.</strong>
+
+    p.lead
+        | <strong>So we made Transparent.</strong>
+
+    a.btn.btn-lg.btn-success.btn-block(href='/interactive')
+        span.fa.fa-pie-chart
+        |  Start visualizing
+
+    br
+    br

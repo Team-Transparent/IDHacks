@@ -12,6 +12,7 @@ function loadCsv(id){
 }
 
 function populate(data, id){
+    $('#results-placeholder').hide();
     $('#results-pane').show();
     $('#csv-output').html(data);
     $('#visualize-link').attr('href', '/visualize/' + id);
