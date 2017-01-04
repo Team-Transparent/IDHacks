@@ -48,7 +48,7 @@ html
       .attr("x", get_radius)
       .attr("y", get_radius)
       .html(function(d){
-      return "<tspan>"+d.subvote+" TZS "+d.fy14+"</tspan>";
+      return "<tspan>"+d.subvote+": TZS "+d.fy14+"</tspan>";
       });
       d3plus.textwrap()
       .container(d3.selectAll('text'))
